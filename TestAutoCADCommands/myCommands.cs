@@ -124,18 +124,106 @@ namespace TestAutoCADCommands
 
             Autodesk.AutoCAD.Windows.ColorDialog col = SelectColor();
 
+            ed.WriteMessage(col.ToString() + "\n");
+            ed.WriteMessage(col.Color.ColorValue.R.ToString()+"\n");
+            ed.WriteMessage(col.Color.ColorValue.ToString()+"\n");
+            ed.WriteMessage(col.Color.ColorName+"\n");
+            ed.WriteMessage(col.Color.ColorIndex.ToString());
+
             ChangeColor(col.Color.ColorValue.R.ToString(), col.Color.ColorValue.G.ToString(), col.Color.ColorValue.B.ToString());
 
-            MyCommand3();
+           // MyCommand3();
         }
+
+
+        [CommandMethod("stuuf", CommandFlags.Modal)]
+        public void MyCommand5() // This method can have any name
+        {
+            Editor ed = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
+
+            System.Collections.Generic.Dictionary<int, string> dic = new System.Collections.Generic.Dictionary<int, string>();
+            dic.Add(1, "stuuf");
+            dic.Add(2, "things");
+            dic.Add(3, "alayer");
+            dic.Add(4, "stuuf2");
+
+            //ed.Command(new Object[] { "-LAYER", "M", "NEWNAME", "C", "T", "255,0,0", "", "L", "DASHED2", "", "" });
+            //ed.Command(new Object[] { "-LAYER", "M", "stuuf", "C", "T", "0,255,0", "", "L", "PHANTOM2", "", "" });
+            //ed.Command(new Object[] { "-LAYER", "M", "BLARG", "C", "T", "0,50,70", "", "L", "Continuous", "", "" });
+            //ed.Command(new Object[] { "C", "T", "255", "0", "0" });
+            //ed.Command(new Object[] { "L", "DASHED2", "", "" });
+            // MyCommand3();
+
+            Document acDoc = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            Database acCurDb = acDoc.Database;
+
+            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                // Returns the layer table for the current database
+                LayerTable acLyrTbl;
+                acLyrTbl = acTrans.GetObject(acCurDb.LayerTableId,
+                                             OpenMode.ForRead) as LayerTable;
+
+                foreach (System.Collections.Generic.KeyValuePair<int, string> t in dic)
+                {
+                    //Console.WriteLine("Key = {0}, Value = {1}", t.Key, t.Value);
+
+                    if (acLyrTbl.Has(t.Value) != true)
+                    {
+                        acDoc.Editor.WriteMessage("\n'" + t.Value + "' does not exist");
+                    }
+                    else
+                    {
+                        acDoc.Editor.WriteMessage("\n'" + t.Value + "' exists");
+                    }
+                }
+
+                // Check to see if MyLayer exists in the Layer table
+                //if (acLyrTbl.Has("MyLayer") != true)
+                //{
+                //    acDoc.Editor.WriteMessage("\n'MyLayer' does not exist");
+                //}
+                //else
+                //{
+                //    acDoc.Editor.WriteMessage("\n'MyLayer' exists");
+                //}
+
+                //// Check to see if MyLayer exists in the Layer table
+                //if (acLyrTbl.Has("stuuf") != true)
+                //{
+                //    acDoc.Editor.WriteMessage("\n'stuuf' does not exist");
+                //}
+                //else
+                //{
+                //    acDoc.Editor.WriteMessage("\n'stuuf' exists");
+                //}
+
+                //// Check to see if MyLayer exists in the Layer table
+                //if (acLyrTbl.Has("things") != true)
+                //{
+                //    acDoc.Editor.WriteMessage("\n'things' does not exist");
+                //}
+                //else
+                //{
+                //    acDoc.Editor.WriteMessage("\n'things' exists");
+                //}
+
+                // Dispose of the transaction
+            }
+        }
+
 
         private Autodesk.AutoCAD.Windows.ColorDialog SelectColor()
         {
             Autodesk.AutoCAD.Windows.ColorDialog dlg = new Autodesk.AutoCAD.Windows.ColorDialog();
 
-            dlg.ShowDialog();
+            //dlg.ShowDialog();
+            if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            {
+                dlg.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 255, 255);
+            }
 
-            return dlg;
+                return dlg;
         }
 
         private void ChangeColor(string red, string green, string blue)
